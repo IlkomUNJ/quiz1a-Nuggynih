@@ -1,19 +1,38 @@
 #include <iostream>
+#include <vector>
 #include "bank_customer.h"
 #include "buyer.h"
+#include "seller.h"
 
 enum PrimaryPrompt{LOGIN, REGISTER, EXIT, ADMIN_LOGIN};
 enum RegisterPrompt{CREATE_BUYER, CREATE_SELLER, BACK};
+enum AdminPrompt {ACCOUNT_MANAGEMENT, SYSTEM_REPORT, LOGOUT, A_BACK};
+
 using namespace std;
 
 int main() {
-    //create a loop prompt 
+    //create a loop prompt
+    bool isAdminLoggedIn =false; //check for login state, false by default
     PrimaryPrompt prompt = LOGIN;
     RegisterPrompt regPrompt = CREATE_BUYER;
+    AdminPrompt adminPrompt = ACCOUNT_MANAGEMENT;
     const string ADMIN_USERNAME = "root";
     const string ADMIN_PASSWORD = "toor";
+    //for admin purpose
     string username, password;
+    //for reg purpose
+    
+    int id;string name; double balance;
+    BankCustomer customer(id, name, balance);
+    Buyer buyer(id, name, customer);
 
+    //storing purposes
+    std::vector<BankCustomer> bankCustomers;
+    std::vector<Buyer> buyers;
+    std::vector<seller> sellers;
+   
+
+    
     while (prompt != EXIT) {
         cout << "Select an option: " << endl;
         cout << "1. Login" << endl;
@@ -92,6 +111,11 @@ int main() {
                     switch (regPrompt) {
                         case CREATE_BUYER:
                             cout << "Create Buyer Account selected." << endl;
+                            cout << "id: ";
+                            cin >> id;
+                            
+        
+
                             break;
                         case CREATE_SELLER:
                             cout << "Create Seller Account selected." << endl;
@@ -118,22 +142,105 @@ int main() {
                 cout << "Exiting." << endl;
                 break;
             case ADMIN_LOGIN:
-                /* Prompt for username & password then check the entries with our hard coded features */
-                cout << "Username: ";
-                cin >> username;
-                cout << "Password: ";
-                cin >> password;
-                /** After login create a sub prompt that provides the following features
-                1. Account Management
-                    - View All Buyers, Sellers
-                    - View All details of Buyers, Sellers
-                    - Seek certain buyer of seller based on Name / account Id / address / phone number
-                    - Create new buyer/seller/Bank account
-                    - Remove buyer/seller based on ID (all related info will be deleted)
-                2. System Report
-                    - Total number of Buyers, Sellers
-                    - Total number of Banking Accounts
-                */
+                if (isAdminLoggedIn) {
+                    cout<< "Youve already logged in!"<< endl;
+                } else {
+                    cout << "Username: ";
+                    cin >> username;
+                    cout << "Password: ";
+                    cin >> password;
+                    if (username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
+                        isAdminLoggedIn = true;
+                        cout << "LOGIN SUCCESSFUL" << endl;
+                        cout << "Welcome " << username << " !" << endl;
+                    } else{
+                        cout<<"invalid credential"<<endl;
+                    }
+                }
+                
+                adminPrompt = ACCOUNT_MANAGEMENT; //reset admin prompt
+                while(adminPrompt != A_BACK && adminPrompt != LOGOUT){ 
+                    cout << "Admin Menu:" << endl;
+                    cout << "1. Account Management" << endl;
+                    cout << "2. System Report" << endl;
+                    cout << "3. Logout" << endl;
+                    cout << "4. Back"<<endl;
+                    int adminChoice;
+                    cin >> adminChoice;
+                    adminPrompt = static_cast<AdminPrompt>(adminChoice-1);
+                    switch (adminPrompt) {
+                        case ACCOUNT_MANAGEMENT:
+                            cout << "Account Management selected." << endl;
+                
+                            cout << "\n--- Account Management Menu ---" << endl;
+                            cout << "1. View All Buyers" << endl;
+                            cout << "2. View All Sellers" << endl;
+                            cout << "3. Create New Buyer" << endl;
+                            cout << "4. Remove Account by ID " << endl;
+                            cout << "5. Back to Admin Menu" << endl;
+                            int Acc_management_choice;
+                            cin >> Acc_management_choice;
+                            cin.ignore(10000, '\n');
+                                switch(Acc_management_choice){
+
+                                    case 1: //view all buyer
+                                        if (buyers.empty()) {
+                                        cout << "No Buyer accounts found." << endl;
+                                        } else {
+                                        cout << "\n--- All Buyer Accounts (" << buyers.size() << ") ---" << endl;
+                                        for (const auto& buyer : buyers) {
+                                            cout << "Buyer ID: " << buyer.getId() 
+                                             << ", Name: " << buyer.getName() << endl;
+                                        }
+                                        break;
+                                    }
+                                    case 2: // View All Sellers
+                                        if (sellers.empty()) {
+                                            cout << "No Seller accounts found." << endl;
+                                        } else {
+                                            cout << "\n--- All Seller Accounts (" << sellers.size() << ") ---" << endl;
+                                            for (const auto& seller : sellers) {
+                                            // Assuming Seller has a method to get seller-specific details
+                                            cout << "Seller ID: " << seller.getId() // Inherited from Buyer
+                                                << ", Store Name: (Need Seller::getSellerName)" << endl;
+                                            }
+                                        break;
+                                    }
+                                    case 3:
+                                        //create new buyer
+                                        cout << "Creating a new buyer account"<<endl;
+                                        break;
+                                    case 4:
+                                        //remove account by ID
+                                        break;
+                                    case 5:
+                                        cout << "Returning to Admin Menu." << endl;
+                                        break;
+                                    default:
+                                        cout << "Invalid Account Management option." << endl;
+                                        break;
+                                    }
+                            break;
+                        case SYSTEM_REPORT:
+                            cout << "System Report selected." << endl;
+                            // Placeholder for system report functionality
+                            /*2. System Report
+                                 - Total number of Buyers, Sellers
+                                 - Total number of Banking Accounts
+                            */
+                            break;
+                        case LOGOUT:
+                            cout << "Logging out admin." << endl;
+                            isAdminLoggedIn = false;
+                            break;
+                        case A_BACK:
+                            cout << "Back selected." << endl;
+                            break;
+                        default:
+                            cout << "Invalid option." << endl;
+                            break;
+                    }
+                }
                 break;
             default:
                 cout << "Invalid option." << endl;
@@ -144,5 +251,5 @@ int main() {
 
     //BankCustomer customer1(1, "Alice", 1000.0);
     //Buyer buyer1(1, customer1.getName(), customer1);
-    return 1;
+    return 0;
 }
